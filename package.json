@@ -1,0 +1,21 @@
+{
+  "name": "random-gofood-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "vercel --prod"
+  },
+  "author": "ans4175",
+  "license": "MIT",
+  "dependencies": {
+    "@turf/destination": "^6.5.0",
+    "@turf/helpers": "^6.5.0",
+    "@vercel/node": "^1.12.1",
+    "axios": "^0.24.0",
+    "dotenv": "^10.0.0",
+    "fastify": "^3.23.1",
+    "uuid": "^8.3.2"
+  }
+}
