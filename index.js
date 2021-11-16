@@ -24,9 +24,10 @@ app
     })
     .get('/merchant/:id', async (req, res) => {
         const { id } = req.params;
-        const detail = await RandomGoFood.detailMerchants(id);
-
-        res.json(detail);
+        const { data, error } = await RandomGoFood.detailMerchants(id);
+        
+        if (error) return res.status(204).json({ error });
+        res.json(data);
     })
 
 const PORT = process.env.PORT || 3001;

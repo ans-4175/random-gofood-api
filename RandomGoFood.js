@@ -48,7 +48,7 @@ const merchantFetch = (id) => {
         res(response.data);
       })
       .catch(function (error) {
-        res([]);
+        res(null);
       });
   });
 };
@@ -79,21 +79,29 @@ const goFoodList = async (obj) => {
 const merchantDetail = async (id) => {
   const merchant = await merchantFetch(id);
 
+  if (!merchant) return {
+    data: null,
+    error: `No merchant with id:${id}`
+  }
+
   return {
-    id: merchant.restaurant.id,
-    name: merchant.restaurant.name,
-    phone_number: merchant.restaurant.phone_number,
-    address: merchant.restaurant.address,
-    location: merchant.restaurant.location,
-    link: merchant.restaurant.short_link,
-    menu: merchant.items.map((it) => {
-      return {
-        name: it.name,
-        price: it.price,
-        image: it.image,
-        weight: it.weight
-      };
-    })
+    data: {
+      id: merchant.restaurant.id,
+      name: merchant.restaurant.name,
+      phone_number: merchant.restaurant.phone_number,
+      address: merchant.restaurant.address,
+      location: merchant.restaurant.location,
+      link: merchant.restaurant.short_link,
+      menu: merchant.items.map((it) => {
+        return {
+          name: it.name,
+          price: it.price,
+          image: it.image,
+          weight: it.weight
+        };
+      })
+    },
+    error: null
   };
 };
 
