@@ -118,10 +118,24 @@ const getRandomPoint = (location, distance = 1) => {
   };
 };
 
+const pickNRandom = (arr, n) => {
+  let result = new Array(n),
+    len = arr.length,
+    taken = new Array(len);
+  //   if (n > len) throw new RangeError('getRandom: more elements taken than available');
+  while (n-- && result.length <= len) {
+    const x = Math.floor(Math.random() * len);
+    result[n] = arr[x in taken ? taken[x] : x];
+    taken[x] = --len in taken ? taken[len] : len;
+  }
+  return result;
+}
+
 class RandomGoFood {
   constructor(lat, long) {
     this.initialPoint = { lat, long };
-    this.randomPoints = [...Array(3)].map((a) => getRandomPoint({ lat, long }));
+    // random this points to fetch
+    this.randomPoints = [...Array(3)].map((a) => getRandomPoint({ lat, long }, (Math.floor(Math.random() * 3) + 1)));
   }
 
   async fetchMerchants() {
@@ -129,7 +143,9 @@ class RandomGoFood {
       return goFoodList(point);
     });
     const lists = (await Promise.all(pLists)).flat();
-    this.merchants = [...new Set(lists)];
+    const pickCount = 30;
+    // make it unique
+    this.merchants = pickNRandom([...new Map(lists.map(item => [item['id'], item])).values()], pickCount);
 
     return this.merchants;
   }
