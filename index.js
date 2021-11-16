@@ -26,7 +26,7 @@ app
         const { id } = req.params;
         const { data, error } = await RandomGoFood.detailMerchants(id);
         
-        if (error) return res.status(204).json({ error });
+        if (error) return res.status(404).json({ error });
         res.json(data);
     })
 
