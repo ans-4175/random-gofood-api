@@ -135,7 +135,7 @@ class RandomGoFood {
   constructor(lat, long) {
     this.initialPoint = { lat, long };
     // random this points to fetch
-    this.randomPoints = [...Array(3)].map((a) => getRandomPoint({ lat, long }, (Math.floor(Math.random() * 3) + 1)));
+    this.randomPoints = [...Array(3)].map((a) => getRandomPoint({ lat, long }, (Math.floor(Math.random() * 2) + 1)));
   }
 
   async fetchMerchants() {
