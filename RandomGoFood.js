@@ -92,6 +92,7 @@ const merchantDetail = async (id) => {
       address: merchant.restaurant.address,
       location: merchant.restaurant.location,
       link: merchant.restaurant.short_link,
+      eta_cooking_minutes: merchant.food_preparation_expected_time,
       menu: merchant.items.map((it) => {
         return {
           name: it.name,
