@@ -14,10 +14,11 @@ app
         });
     })
     .get('/random', async (req, res) => {
-        const { lat, long } = req.query;
+        // type = 'FOOD', 'DRINK', 'SNACK', 'COFFEE'
+        const { lat, long, type } = req.query;
         if (!lat || !long) return res.status(406).json({ error: 'Provide lat and long in query' });
 
-        const food = new RandomGoFood(lat, long);
+        const food = new RandomGoFood(lat, long, type);
         const merchants = await food.fastestMerchants();
 
         res.json(merchants);

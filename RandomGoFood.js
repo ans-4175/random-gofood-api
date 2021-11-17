@@ -124,27 +124,70 @@ const pickNRandom = (arr, n) => {
     len = arr.length,
     taken = new Array(len);
   //   if (n > len) throw new RangeError('getRandom: more elements taken than available');
-  while (n-- && result.length <= len) {
-    const x = Math.floor(Math.random() * len);
-    result[n] = arr[x in taken ? taken[x] : x];
-    taken[x] = --len in taken ? taken[len] : len;
+  if (n > len) {
+    result = [...arr];
+  } else {
+    while (n-- && result.length <= len) {
+      const x = Math.floor(Math.random() * len);
+      result[n] = arr[x in taken ? taken[x] : x];
+      taken[x] = --len in taken ? taken[len] : len;
+    }
   }
+  
   return result;
 }
 
+const checkType = (tag, type) => {
+  let through;
+  switch (type) {
+    case 'FOOD':
+      const listFood = [
+        'ANEKA_NASI','FASTFOOD','SOTO_BAKSO_SOP','ANEKA_AYAM_BEBEK','ROTI',
+        'CHINESE','KOREAN','JAPANESE','SEAFOOD','BAKMIE','SATE',
+        'PIZZA_PASTA','THAI','MIDDLE_EASTERN','BURGER_SANDWICH_STEAK'
+      ];
+      through = listFood.reduce((pLogic, food) => {
+        return pLogic || tag.includes(food);
+      }, false);
+      break;
+    case 'DRINK':
+      through = tag.includes('COFFEE_SHOP') || tag.includes('MINUMAN');
+      break;
+    case 'SNACK':
+      through = tag.includes('SNACKS_JAJANAN') || tag.includes('SWEETS_DESSERTS') || tag.includes('MARTABAK');
+      break;
+    case 'COFFEE':
+      through = tag.includes('COFFEE_SHOP');
+      break;
+    default:
+      break;
+  }
+  return through;
+}
+
 class RandomGoFood {
-  constructor(lat, long) {
+  constructor(lat, long, type = null) {
     this.initialPoint = { lat, long };
+    this.type = type;
     // random this points to fetch
-    this.randomPoints = [...Array(3)].map((a) => getRandomPoint({ lat, long }, (Math.floor(Math.random() * 2.5) + 1)));
+    this.randomizePoints();
+  }
+
+  randomizePoints() {
+    this.randomPoints = [...Array(4)].map((a) => getRandomPoint(this.initialPoint, (Math.floor(Math.random() * 2.5) + 1))); 
   }
 
   async fetchMerchants() {
     const pLists = this.randomPoints.map((point) => {
       return goFoodList(point);
     });
-    const lists = (await Promise.all(pLists)).flat();
-    const pickCount = 30;
+    let lists = (await Promise.all(pLists)).flat();
+    if (this.type) {
+      lists = lists.filter(merch => {
+        return checkType(merch.tag, this.type)
+      });
+    }
+    const pickCount = 20;
     // make it unique
     this.merchants = pickNRandom([...new Map(lists.map(item => [item['id'], item])).values()], pickCount);
 
