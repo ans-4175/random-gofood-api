@@ -174,7 +174,7 @@ class RandomGoFood {
   }
 
   randomizePoints() {
-    this.randomPoints = [...Array(4)].map((a) => getRandomPoint(this.initialPoint, (Math.floor(Math.random() * 2.5) + 1))); 
+    this.randomPoints = [...Array(4)].map((a) => getRandomPoint(this.initialPoint, (Math.floor(Math.random() * 1.5) + 1))); 
   }
 
   async fetchMerchants() {
