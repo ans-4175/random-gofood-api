@@ -23,6 +23,16 @@ app
 
         res.json(merchants);
     })
+    .get('/intel', async (req, res) => {
+        // type = 'FOOD', 'DRINK', 'SNACK', 'COFFEE'
+        const { lat, long, type } = req.query;
+        if (!lat || !long) return res.status(406).json({ error: 'Provide lat and long in query' });
+
+        const food = new RandomGoFood(lat, long, type);
+        const merchants = await food.intelMerchants();
+
+        res.json(merchants);
+    })
     .get('/merchant/:id', async (req, res) => {
         const { id } = req.params;
         const { data, error } = await RandomGoFood.detailMerchants(id);

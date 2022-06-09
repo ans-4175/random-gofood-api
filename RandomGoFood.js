@@ -53,27 +53,46 @@ const merchantFetch = (id) => {
   });
 };
 
-const goFoodList = async (obj) => {
+const mapList = (merch) => {
+  return {
+    id: merch.content.id,
+    active: merch.content.active,
+    is_open: merch.content.open_status.code,
+    address: merch.content.address,
+    phone_number: merch.content.phone_number,
+    price_level: merch.content.avg_spend_level?.price_level,
+    rating: merch.rating?.text,
+    title: merch.title,
+    name: merch.content.brand.name,
+    tag: merch.content.cuisines.map((c) => c.code).join(','),
+    distance_km: merch.content.delivery_status.distance,
+    location: merch.content.location,
+    eta_delivery_minutes: merch.content.delivery_status.eta?.minutes,
+    eta_cooking_minutes: merch.content.food_preparation_expected_time
+  };
+}
+
+const mapIntel = (merch) => {
+  return {
+    id: merch.content.id,
+    active: merch.content.active,
+    is_open: merch.content.open_status.code,
+    name: merch.content.brand.name,
+    title: merch.title,
+    address: merch.content.address,
+    gmap: `https://www.google.com/maps/search/?api=1&query=${merch.content.location}`,
+    phone_number: merch.content.phone_number,
+    price_level: merch.content.avg_spend_level?.price_level,
+    rating: merch.rating?.text,
+    tag: merch.content.cuisines.map((c) => c.code).join(',')
+  };
+}
+
+const goFoodList = async (obj, type) => {
   // obj = { page: 0, lat: '-6.755916003793253', long: '108.51373109736657' }
   const merchants = await goFoodFetch(obj);
-  return merchants.map((merch) => {
-    return {
-      id: merch.content.id,
-      active: merch.content.active,
-      is_open: merch.content.open_status.code,
-      address: merch.content.address,
-      phone_number: merch.content.phone_number,
-      price_level: merch.content.avg_spend_level?.price_level,
-      rating: merch.rating?.text,
-      title: merch.title,
-      name: merch.content.brand.name,
-      tag: merch.content.cuisines.map((c) => c.code).join(','),
-      distance_km: merch.content.delivery_status.distance,
-      location: merch.content.location,
-      eta_delivery_minutes: merch.content.delivery_status.eta?.minutes,
-      eta_cooking_minutes: merch.content.food_preparation_expected_time
-    };
-  });
+  const mapFunc = (type === 'INTEL') ? mapIntel : mapList;
+  return merchants.map((merch) => mapFunc(merch));
 };
 
 const merchantDetail = async (id) => {
@@ -83,6 +102,7 @@ const merchantDetail = async (id) => {
     data: null,
     error: `No merchant with id:${id}`
   }
+  // console.log(JSON.stringify(merchant));
 
   return {
     data: {
@@ -177,9 +197,9 @@ class RandomGoFood {
     this.randomPoints = [...Array(4)].map((a) => getRandomPoint(this.initialPoint, (Math.floor(Math.random() * 1.5) + 1))); 
   }
 
-  async fetchMerchants() {
+  async fetchMerchants(typeFetch, nPick) {
     const pLists = this.randomPoints.map((point) => {
-      return goFoodList(point);
+      return goFoodList(point, typeFetch);
     });
     let lists = (await Promise.all(pLists)).flat();
     if (this.type) {
@@ -187,8 +207,12 @@ class RandomGoFood {
         return checkType(merch.tag, this.type)
       });
     }
-    const pickCount = 20;
+    const pickCount = nPick ? nPick : 20;
     // make it unique
+    if (typeFetch === 'INTEL') {
+      return pickNRandom([...new Map(lists.map(item => [item['id'], item])).values()], pickCount);
+    }
+
     this.merchants = pickNRandom([...new Map(lists.map(item => [item['id'], item])).values()], pickCount);
 
     return this.merchants;
@@ -219,6 +243,15 @@ class RandomGoFood {
     return this.merchants
       .filter((m) => m.price_level)
       .sort((a, b) => b.price_level - a.price_level || a.eta_delivery_minutes - b.eta_delivery_minutes);
+  }
+
+  async intelMerchants() {
+    // always check
+    const merchants = await this.fetchMerchants('INTEL', 50);
+
+    return merchants
+      .filter((m) => m.price_level)
+      .sort((a, b) => b.price_level - a.price_level);
   }
 
   static async detailMerchants(id) {
