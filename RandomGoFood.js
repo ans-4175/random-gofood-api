@@ -102,7 +102,7 @@ const merchantDetail = async (id) => {
     data: null,
     error: `No merchant with id:${id}`
   }
-  // console.log(JSON.stringify(merchant));
+  // console.log(merchant);
 
   return {
     data: {
@@ -186,15 +186,16 @@ const checkType = (tag, type) => {
 }
 
 class RandomGoFood {
-  constructor(lat, long, type = null) {
+  constructor(lat, long, type = null, nPoint = 4) {
     this.initialPoint = { lat, long };
     this.type = type;
     // random this points to fetch
-    this.randomizePoints();
+    this.randomizePoints(nPoint);
   }
 
-  randomizePoints() {
-    this.randomPoints = [...Array(4)].map((a) => getRandomPoint(this.initialPoint, (Math.floor(Math.random() * 1.5) + 1))); 
+  randomizePoints(nPoint) {
+    const pointCount = nPoint ? nPoint : 4;
+    this.randomPoints = [...Array(pointCount)].map((a) => getRandomPoint(this.initialPoint, (Math.floor(Math.random() * 1.5) + 1))); 
   }
 
   async fetchMerchants(typeFetch, nPick) {
@@ -241,7 +242,7 @@ class RandomGoFood {
     if (typeof this.merchants === 'undefined') await this.fetchMerchants();
 
     return this.merchants
-      .filter((m) => m.price_level)
+      .filter((m) => m.price_level && m.price_level > 2)
       .sort((a, b) => b.price_level - a.price_level || a.eta_delivery_minutes - b.eta_delivery_minutes);
   }
 
@@ -250,7 +251,7 @@ class RandomGoFood {
     const merchants = await this.fetchMerchants('INTEL', 50);
 
     return merchants
-      .filter((m) => m.price_level)
+      .filter((m) => m.price_level && m.price_level > 2)
       .sort((a, b) => b.price_level - a.price_level);
   }
 

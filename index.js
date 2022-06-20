@@ -28,7 +28,7 @@ app
         const { lat, long, type } = req.query;
         if (!lat || !long) return res.status(406).json({ error: 'Provide lat and long in query' });
 
-        const food = new RandomGoFood(lat, long, type);
+        const food = new RandomGoFood(lat, long, type, 8);
         const merchants = await food.intelMerchants();
 
         res.json(merchants);
